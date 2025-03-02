@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iO Partners - Commute Analysis Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #372473;
+            --secondary: #6B46E1;
+            --accent: #FF7145;
+            --light-bg: #F0ECFC;
+            --white: #FFFFFF;
+            --black: #000000;
+            --gray: #9BA0A5;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--black);
+            line-height: 1.6;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--white);
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .slogan {
+            font-size: 14px;
+            font-weight: 300;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        h1 {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .input-panel {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        textarea, input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray);
+            border-radius: 5px;
+            font-family: 'Poppins', Arial, sans-serif;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        textarea {
+            min-height: 150px;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Poppins', Arial, sans-serif;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        button:hover {
+            background-color: var(--secondary);
+        }
+        
+        button.secondary {
+            background-color: var(--gray);
+        }
+        
+        button.secondary:hover {
+            background-color: #8a8f94;
+        }
+        
+        button.accent {
+            background-color: var(--accent);
+        }
+        
+        button.accent:hover {
+            background-color: #e56a3f;
+        }
+        
+        #map {
+            height: 400px;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .results-panel {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 14px;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: var(--light-bg);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .api-key-panel {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .api-key-form {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 600px) {
+            .api-key-form {
+                flex-direction: column;
+            }
+        }
+        
+        .instructions {
+            background-color: var(--light-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .instructions h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .instructions ol {
+            margin-left: 1.5rem;
+        }
+        
+        .instructions li {
+            margin-bottom: 0.5rem;
+        }
+        
+        #mapSection {
+            display: none;
+        }
+        
+        .status-message {
+            color: var(--primary);
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+        
+        .error-message {
+            color: red;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-circle">iO</div>
+            <div class="logo-text">iO Partners</div>
+        </div>
+        <div class="slogan">We shape the best outcomes through an innovative mindset.</div>
+    </header>
+    
+    <div class="container">
+        <h1>Commute Analysis Tool</h1>
+        
+        <div class="api-key-panel">
+            <div class="instructions">
+                <h3>How to use this tool</h3>
+                <ol>
+                    <li>Enter your Google Maps API key (requires Geocoding, Distance Matrix, and Maps JavaScript APIs)</li>
+                    <li>Enter starting points and destinations (one address per line)</li>
+                    <li>Select the day of the week and arrival time</li>
+                    <li>Click "Analyze Commute Times" to get results</li>
+                    <li>Use "Download Excel" to save the results</li>
+                </ol>
+            </div>
+            
+            <div class="form-group">
+                <label for="apiKey">Google Maps API Key</label>
+                <div class="api-key-form">
+                    <input type="text" id="apiKey" placeholder="Enter your Google Maps API Key">
+                    <button id="saveApiKey">Save & Load Maps</button>
+                </div>
+                <p style="font-size: 12px; margin-top: 5px; color: var(--gray);">Your API key is stored only on your device and is not shared with anyone.</p>
+                <div id="apiStatus" class="status-message"></div>
+            </div>
+        </div>
+        
+        <div class="app-container">
+            <div class="input-panel">
+                <div class="form-group">
+                    <label for="startingPoints">Starting Points (one address per line)</label>
+                    <textarea id="startingPoints" placeholder="e.g.&#10;Wenceslas Square, Prague&#10;Charles Bridge, Prague"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="destinations">Destinations (one address per line)</label>
+                    <textarea id="destinations" placeholder="e.g.&#10;Prague Castle&#10;Old Town Square, Prague"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dayOfWeek">Day of Week</label>
+                    <select id="dayOfWeek">
+                        <option value="1">Monday</option>
+                        <option value="2">Tuesday</option>
+                        <option value="3">Wednesday</option>
+                        <option value="4">Thursday</option>
+                        <option value="5">Friday</option>
+                        <option value="6">Saturday</option>
+                        <option value="0">Sunday</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="arrivalTime">Arrival Time</label>
+                    <input type="time" id="arrivalTime" value="09:00">
+                </div>
+                
+                <button id="analyzeBtn" disabled>Analyze Commute Times</button>
+                <button id="clearBtn" class="secondary">Clear All</button>
+                <div id="analyzeStatus" class="status-message"></div>
+            </div>
+            
+            <div class="results-panel">
+                <div id="mapSection">
+                    <div id="map"></div>
+                </div>
+                
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing commute times...</p>
+                </div>
+                
+                <div id="resultsContainer">
+                    <h2>Results</h2>
+                    <button id="downloadBtn" class="accent" disabled>Download Excel</button>
+                    <div id="resultsTable"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Holds our results data
+        let analysisResults = [];
+        let markers = [];
+        let map;
+        let isMapInitialized = false;
+        let isGoogleMapsLoaded = false;
+        let geocoder;
+        let distanceMatrixService;
+        
+        // Status elements
+        const apiStatus = document.getElementById('apiStatus');
+        const analyzeStatus = document.getElementById('analyzeStatus');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        // Get saved API key
+        const savedApiKey = localStorage.getItem('googleMapsApiKey');
+        if (savedApiKey) {
+            document.getElementById('apiKey').value = savedApiKey;
+        }
+        
+        // Initialize map
+        function initMap() {
+            try {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat: 50.0755, lng: 14.4378 }, // Prague center
+                    zoom: 12
+                });
+                
+                // Initialize services
+                geocoder = new google.maps.Geocoder();
+                distanceMatrixService = new google.maps.DistanceMatrixService();
+                
+                isMapInitialized = true;
+                isGoogleMapsLoaded = true;
+                
+                // Show map section
+                document.getElementById('mapSection').style.display = 'block';
+                
+                // Enable analyze button
+                analyzeBtn.disabled = false;
+                
+                apiStatus.textContent = "Google Maps loaded successfully!";
+                apiStatus.style.color = "green";
+            } catch (error) {
+                console.error("Error initializing map:", error);
+                apiStatus.textContent = "Error initializing map: " + error.message;
+                apiStatus.style.color = "red";
+            }
+        }
+        
+        // Load Google Maps API with custom key
+        function loadMapsApi() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            
+            if (!apiKey) {
+                alert('Please enter a Google Maps API key');
+                return;
+            }
+            
+            // Save in local storage
+            localStorage.setItem('googleMapsApiKey', apiKey);
+            
+            // Update status
+            apiStatus.textContent = "Loading Google Maps...";
+            
+            // Check if script already exists and remove it
+            const existingScript = document.getElementById('google-maps-script');
+            if (existingScript) {
+                existingScript.remove();
+            }
+            
+            // Reset map initialization flag
+            isMapInitialized = false;
+            isGoogleMapsLoaded = false;
+            
+            // Add window.initMap function before adding script
+            window.initMap = initMap;
+            
+            // Create script element
+            const script = document.createElement('script');
+            script.id = 'google-maps-script';
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
+            script.async = true;
+            script.defer = true;
+            
+            // Error handling
+            script.onerror = function() {
+                apiStatus.textContent = "Failed to load Google Maps API. Check your API key.";
+                apiStatus.style.color = "red";
+            };
+            
+            // Add script to head (not body)
+            document.head.appendChild(script);
+        }
+        
+        // Clear all markers from the map
+        function clearMarkers() {
+            for (let i = 0; i < markers.length; i++) {
+                markers[i].setMap(null);
+            }
+            markers = [];
+        }
+        
+        // Add markers to the map
+        function addMarkers(startPoints, destPoints) {
+            clearMarkers();
+            
+            // Add starting points (white)
+            startPoints.forEach(point => {
+                if (point.geometry) {
+                    console.log("Adding start marker:", point.geometry.location);
+                    const marker = new google.maps.Marker({
+                        position: point.geometry.location,
+                        map: map,
+                        title: point.name,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            fillColor: '#FFFFFF',
+                            fillOpacity: 1,
+                            strokeColor: '#000000',
+                            strokeWeight: 1,
+                            scale: 8
+                        }
+                    });
+                    markers.push(marker);
+                }
+            });
+            
+            // Add destination points (purple - #372473)
+            destPoints.forEach(point => {
+                if (point.geometry) {
+                    console.log("Adding dest marker:", point.geometry.location);
+                    const marker = new google.maps.Marker({
+                        position: point.geometry.location,
+                        map: map,
+                        title: point.name,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            fillColor: '#372473',
+                            fillOpacity: 1,
+                            strokeColor: '#000000',
+                            strokeWeight: 1,
+                            scale: 8
+                        }
+                    });
+                    markers.push(marker);
+                }
+            });
+            
+            // Fit map to show all markers
+            if (markers.length > 0) {
+                const bounds = new google.maps.LatLngBounds();
+                markers.forEach(marker => {
+                    bounds.extend(marker.getPosition());
+                });
+                map.fitBounds(bounds);
+            }
+        }
+        
+        // Convert address to coordinates
+        function geocodeAddress(address) {
+            return new Promise((resolve, reject) => {
+                console.log("Geocoding address:", address);
+                geocoder.geocode({ 'address': address }, (results, status) => {
+                    if (status === 'OK') {
+                        console.log("Geocoding result:", results[0]);
+                        resolve({
+                            name: address,
+                            geometry: results[0].geometry,
+                            formatted_address: results[0].formatted_address
+                        });
+                    } else {
+                        console.error('Geocode failed for address ' + address + ' with status ' + status);
+                        resolve({
+                            name: address,
+                            error: 'Could not geocode address (Status: ' + status + ')'
+                        });
+                    }
+                });
+            });
+        }
+        
+        // Calculate commute time using Distance Matrix API
+        function calculateCommuteTime(origin, destination, arrivalTime, mode) {
+            return new Promise((resolve, reject) => {
+                if (!origin.geometry || !destination.geometry) {
+                    resolve({
+                        error: 'Invalid coordinates'
+                    });
+                    return;
+                }
+                
+                const request = {
+                    origins: [origin.geometry.location],
+                    destinations: [destination.geometry.location],
+                    travelMode: mode === 'driving' ? google.maps.TravelMode.DRIVING : google.maps.TravelMode.TRANSIT,
+                    transitOptions: mode === 'transit' ? {
+                        arrivalTime: arrivalTime
+                    } : undefined,
+                    drivingOptions: mode === 'driving' ? {
+                        departureTime: new Date(arrivalTime.getTime() - 30 * 60000), // 30 minutes before arrival time
+                        trafficModel: google.maps.TrafficModel.BEST_GUESS
+                    } : undefined,
+                };
+                
+                console.log("Distance Matrix request:", request);
+                
+                distanceMatrixService.getDistanceMatrix(request, (response, status) => {
+                    console.log("Distance Matrix response:", response, status);
+                    
+                    if (status === 'OK') {
+                        const result = response.rows[0].elements[0];
+                        if (result.status === 'OK') {
+                            resolve({
+                                duration: result.duration.text,
+                                duration_value: result.duration.value,
+                                distance: result.distance.text
+                            });
+                        } else {
+                            resolve({
+                                error: 'Route not found (Status: ' + result.status + ')'
+                            });
+                        }
+                    } else {
+                        console.error('Distance Matrix request failed with status ' + status);
+                        resolve({
+                            error: 'API error (Status: ' + status + ')'
+                        });
+                    }
+                });
+            });
+        }
+        
+        // Process all the commute analyses
+        async function processCommuteAnalysis() {
+            if (!isMapInitialized) {
+                alert("Map is not initialized. Please save a valid API key first.");
+                return;
+            }
+            
+            const startingPointsText = document.getElementById('startingPoints').value.trim();
+            const destinationsText = document.getElementById('destinations').value.trim();
+            
+            if (!startingPointsText || !destinationsText) {
+                alert('Please enter both starting points and destinations');
+                return;
+            }
+            
+            // Show loading
+            document.querySelector('.loading').style.display = 'block';
+            document.getElementById('resultsTable').innerHTML = '';
+            analyzeStatus.textContent = "Analyzing commute times...";
+            
+            // Parse addresses
+            const startingAddresses = startingPointsText.split('\n').filter(line => line.trim() !== '');
+            const destinationAddresses = destinationsText.split('\n').filter(line => line.trim() !== '');
+            
+            console.log("Starting addresses:", startingAddresses);
+            console.log("Destination addresses:", destinationAddresses);
+            
+            // Geocode all addresses
+            try {
+                const startingPoints = await Promise.all(startingAddresses.map(addr => geocodeAddress(addr)));
+                const destinationPoints = await Promise.all(destinationAddresses.map(addr => geocodeAddress(addr)));
+                
+                console.log("Geocoded starting points:", startingPoints);
+                console.log("Geocoded destination points:", destinationPoints);
+                
+                // Add markers to map
+                addMarkers(startingPoints, destinationPoints);
+                
+                // Get arrival time
+                const dayOfWeek = parseInt(document.getElementById('dayOfWeek').value);
+                const timeString = document.getElementById('arrivalTime').value;
+                const [hours, minutes] = timeString.split(':').map(Number);
+                
+                // Create arrival date for next occurrence of selected day
+                const now = new Date();
+                const arrivalDate = new Date();
+                const diff = (dayOfWeek + 7 - now.getDay()) % 7;
+                arrivalDate.setDate(now.getDate() + diff);
+                arrivalDate.setHours(hours, minutes, 0, 0);
+                
+                // If the calculated day is today and the time has already passed, move to next week
+                if (diff === 0 && arrivalDate < now) {
+                    arrivalDate.setDate(arrivalDate.getDate() + 7);
+                }
+                
+                console.log("Analysis arrival date:", arrivalDate);
+                
+                // Build results array
+                analysisResults = [];
+                
+                // Calculate all combinations
+                for (const startPoint of startingPoints) {
+                    for (const destPoint of destinationPoints) {
+                        if (startPoint.error || destPoint.error) {
+                            analysisResults.push({
+                                starting_point: startPoint.name,
+                                destination: destPoint.name,
+                                driving_duration: startPoint.error || destPoint.error,
+                                transit_duration: startPoint.error || destPoint.error,
+                                error: true
+                            });
+                            continue;
+                        }
+                        
+                        // Calculate driving time
+                        console.log("Calculating driving time for", startPoint.name, "to", destPoint.name);
+                        const drivingResult = await calculateCommuteTime(startPoint, destPoint, arrivalDate, 'driving');
+                        
+                        // Calculate transit time
+                        console.log("Calculating transit time for", startPoint.name, "to", destPoint.name);
+                        const transitResult = await calculateCommuteTime(startPoint, destPoint, arrivalDate, 'transit');
+                        
+                        analysisResults.push({
+                            starting_point: startPoint.formatted_address || startPoint.name,
+                            destination: destPoint.formatted_address || destPoint.name,
+                            driving_duration: drivingResult.error || drivingResult.duration,
+                            driving_distance: drivingResult.error ? 'N/A' : drivingResult.distance,
+                            transit_duration: transitResult.error || transitResult.duration,
+                            transit_distance: transitResult.error ? 'N/A' : transitResult.distance,
+                            error: drivingResult.error && transitResult.error
+                        });
+                    }
+                }
+                
+                // Display results
+                displayResults();
+                
+                // Enable download button
+                downloadBtn.disabled = false;
+                
+                // Hide loading
+                document.querySelector('.loading').style.display = 'none';
+                analyzeStatus.textContent = "Analysis complete!";
+                analyzeStatus.style.color = "green";
+                
+            } catch (error) {
+                console.error("Error in analysis:", error);
+                document.querySelector('.loading').style.display = 'none';
+                analyzeStatus.textContent = "Error in analysis: " + error.message;
+                analyzeStatus.style.color = "red";
+            }
+        }
+        
+        // Display results in table
+        function displayResults() {
+            const tableContainer = document.getElementById('resultsTable');
+            
+            if (analysisResults.length === 0) {
+                tableContainer.innerHTML = '<p>No results to display</p>';
+                return;
+            }
+            
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Starting Point</th>
+                            <th>Destination</th>
+                            <th>Driving Time</th>
+                            <th>Driving Distance</th>
+                            <th>Transit Time</th>
+                            <th>Transit Distance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            analysisResults.forEach(result => {
+                tableHTML += `
+                    <tr${result.error ? ' style="background-color: #ffeeee;"' : ''}>
+                        <td>${result.starting_point}</td>
+                        <td>${result.destination}</td>
+                        <td>${result.driving_duration}</td>
+                        <td>${result.driving_distance || 'N/A'}</td>
+                        <td>${result.transit_duration}</td>
+                        <td>${result.transit_distance || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            tableContainer.innerHTML = tableHTML;
+        }
+        
+        // Download results as Excel
+        function downloadExcel() {
+            if (analysisResults.length === 0) {
+                alert('No results to download');
+                return;
+            }
+            
+            // Format data for Excel
+            const excelData = [
+                ['Starting Point', 'Destination', 'Driving Time', 'Driving Distance', 'Transit Time', 'Transit Distance'],
+                ...analysisResults.map(result => [
+                    result.starting_point,
+                    result.destination,
+                    result.driving_duration,
+                    result.driving_distance || 'N/A',
+                    result.transit_duration,
+                    result.transit_distance || 'N/A'
+                ])
+            ];
+            
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Commute Analysis');
+            
+            // Generate filename with date
+            const now = new Date();
+            const date = now.toISOString().split('T')[0];
+            const filename = `commute_analysis_${date}.xlsx`;
+            
+            // Download file
+            XLSX.writeFile(wb, filename);
+        }
+        
+        // Clear all inputs and results
+        function clearAll() {
+            document.getElementById('startingPoints').value = '';
+            document.getElementById('destinations').value = '';
+            document.getElementById('resultsTable').innerHTML = '';
+            downloadBtn.disabled = true;
+            clearMarkers();
+            analysisResults = [];
+            analyzeStatus.textContent = "";
+        }
+        
+        // Set up event listeners when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up buttons
+            document.getElementById('saveApiKey').addEventListener('click', loadMapsApi);
+            document.getElementById('analyzeBtn').addEventListener('click', processCommuteAnalysis);
+            document.getElementById('downloadBtn').addEventListener('click', downloadExcel);
+            document.getElementById('clearBtn').addEventListener('click', clearAll);
+            
+            // If API key is saved, try to load map automatically
+            if (savedApiKey) {
+                document.getElementById('apiKey').value = savedApiKey;
+                setTimeout(loadMapsApi, 500); // Slight delay to ensure everything is loaded
+            }
+        });
+    </script>
+</body>
+</html>
