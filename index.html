@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iO Partners - Přihlášení</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #372473;
+            --secondary: #6B46E1;
+            --accent: #FF7145;
+            --light-bg: #F0ECFC;
+            --white: #FFFFFF;
+            --black: #000000;
+            --gray: #9BA0A5;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--black);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .login-container {
+            background-color: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+        
+        .logo-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--white);
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        h1 {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray);
+            border-radius: 5px;
+            font-family: 'Poppins', Arial, sans-serif;
+            font-size: 14px;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Poppins', Arial, sans-serif;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        button:hover {
+            background-color: var(--secondary);
+        }
+        
+        .error-message {
+            color: red;
+            margin-top: 1rem;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <div class="logo-circle">iO</div>
+            <div class="logo-text">iO Partners</div>
+        </div>
+        
+        <h1>Dojezdová analýza</h1>
+        
+        <div class="form-group">
+            <label for="password">Heslo</label>
+            <input type="password" id="password" placeholder="Zadejte heslo">
+        </div>
+        
+        <button id="loginBtn">Přihlásit se</button>
+        
+        <p id="errorMessage" class="error-message">Nesprávné heslo. Zkuste to prosím znovu.</p>
+    </div>
+    
+    <script>
+        // Jednoduché heslo pro přihlášení
+        const correctPassword = "iO Partners";
+        
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            const password = document.getElementById('password').value;
+            
+            // Přímé porovnání zadaného hesla
+            if (password === correctPassword) {
+                // Uložit stav přihlášení do session storage
+                sessionStorage.setItem('authenticated', 'true');
+                // Přesměrovat na hlavní aplikaci
+                window.location.href = 'app.html';
+            } else {
+                // Zobrazit chybovou zprávu
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        });
+        
+        // Umožnit přihlášení stiskem klávesy Enter
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('loginBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>
